@@ -1,59 +1,21 @@
-from optimizer import SGD
-from trainer import Trainer
-from neural_network import NeuralNetwork
-from dense import Dense
-from mean_squared_error import MeanSquaredError
-from sigmoid import Sigmoid
-from linear import Linear
-
-from random import randint
 import numpy as np
-from numpy import ndarray
-
-from metrics import eval_regression_model
-
-from sklearn.datasets import load_iris
-
-# Scaling the data
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
 
-boston = load_iris()
-data = boston.data
-target = boston.target
-features = boston.feature_names
+from dense import Dense
+from linear import Linear
+from mean_squared_error import MeanSquaredError
+from metrics import eval_regression_model
+from neural_network import NeuralNetwork
+from optimizer import SGD
+from polygon.datasets import get_iris_data, get_numbers_data
+from sigmoid import Sigmoid
+from trainer import Trainer
 
-s = StandardScaler()
-data = s.fit_transform(data)
-
-def to_2d_np(a: ndarray, 
-          type: str="col") -> ndarray:
-    '''
-    Turns a 1D Tensor into 2D
-    '''
-
-    assert a.ndim == 1, \
-    "Input tensors must be 1 dimensional"
-    
-    if type == "col":        
-        return a.reshape(-1, 1)
-    elif type == "row":
-        return a.reshape(1, -1)
-    
-X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.3, random_state=80718)
-
-# make target 2d array
-y_train, y_test = to_2d_np(y_train), to_2d_np(y_test)
-
-lr = NeuralNetwork(
-    layers=[Dense(neurons=1,
-                   activation=Linear())],
-    loss=MeanSquaredError(),
-    seed=20190501
-)
-
-nn = NeuralNetwork(
-    layers=[Dense(neurons=13,
+X_train, X_test, y_train, y_test = get_numbers_data()
+neural_network = NeuralNetwork(
+    layers=[Dense(neurons=20,
+                   activation=Sigmoid()),
+            Dense(neurons=20,
                    activation=Sigmoid()),
             Dense(neurons=1,
                    activation=Linear())],
@@ -61,24 +23,21 @@ nn = NeuralNetwork(
     seed=20190501
 )
 
-dl = NeuralNetwork(
-    layers=[Dense(neurons=100,
-                   activation=Sigmoid()),
-            Dense(neurons=100,
-                   activation=Sigmoid()),
-            Dense(neurons=1,
-                   activation=Linear())],
-    loss=MeanSquaredError(),
-    seed=20190501
-)
-
-
-
-trainer = Trainer(dl, SGD(lr=0.01))
+trainer = Trainer(neural_network, SGD(lr=0.01))
 
 trainer.fit(X_train, y_train, X_test, y_test,
        epochs = 50,
        eval_every = 10,
-       seed=20190501);
+       seed=14881337)
 print()
-eval_regression_model(dl, X_test, y_test)
+eval_regression_model(neural_network, X_test, y_test)
+print("datafrom dataset")
+for i in range(10):
+    print(y_train[i])
+print("my data")
+test = [[0.1,0.7],[-0.4,0.6],[1.5,0.7],[2.0,0.1],[0.7,1.8]]
+for i in test:
+    print("test", i,"solve",i[0]+i[1])
+print("ans")
+pred = neural_network.forward(np.array(test))
+print(pred)
