@@ -1,6 +1,5 @@
 from numpy import ndarray
 
-
 def to_2d_array(a: ndarray,
                 type: str = "col") -> ndarray:
     '''

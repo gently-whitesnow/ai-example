@@ -1,14 +1,10 @@
-import matplotlib.pyplot as plt
-import matplotlib
-import numpy as np
-from numpy import ndarray
-# %matplotlib inline
+from typing import List
 
-from typing import Callable, List
-from typing import Dict
+from numpy import ndarray
+
+from asserts import assert_same_shape
 from operation import Operation
 from param_operation import ParamOperation
-from asserts import assert_same_shape
 
 class Layer(object):
     '''
@@ -58,6 +54,8 @@ class Layer(object):
 
         assert_same_shape(self.output, output_grad)
 
+        # запутанное место, градиент всегда какое-то одно число,
+        # которое проходит в обратном порядке из конечной операции в начальную
         for operation in reversed(self.operations):
             output_grad = operation.backward(output_grad)
 

@@ -5,7 +5,7 @@ from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
-from polygon.common import to_2d_array
+from modules.common import to_2d_array
 
 
 def get_iris_data():
@@ -26,7 +26,7 @@ def get_iris_data():
 def get_numbers_data():
 
     data = []
-    matrix_size = 100000
+    matrix_size = 1000
     for i in range(matrix_size):
         data.append([])
         for j in range(2):
@@ -39,8 +39,8 @@ def get_numbers_data():
     data = np.array(data)
     target = np.array(target)
     # commented for self testing
-    # s = StandardScaler()
-    # data = s.fit_transform(data)
+    s = StandardScaler()
+    data = s.fit_transform(data)
 
     X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.3, random_state=80718)
     # make target 2d array

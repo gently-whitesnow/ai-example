@@ -1,4 +1,3 @@
-
 import numpy as np
 from numpy import ndarray
 from sigmoid import Sigmoid
@@ -20,6 +19,7 @@ class Dense(Layer):
         super().__init__(neurons)
         self.activation = activation
 
+    # Если это первый слой, то задаем рандомные веса и смещения
     def _setup_layer(self, input_: ndarray) -> None:
         '''
         Defines the operations of a fully connected layer.

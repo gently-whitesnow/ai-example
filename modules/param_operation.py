@@ -1,13 +1,8 @@
-import matplotlib.pyplot as plt
-import matplotlib
-import numpy as np
 from numpy import ndarray
-# %matplotlib inline
 
-from typing import Callable
-from typing import Dict
-from operation import Operation
 from asserts import assert_same_shape
+from operation import Operation
+
 
 class ParamOperation(Operation):
     '''

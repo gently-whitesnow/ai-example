@@ -1,14 +1,8 @@
 from copy import deepcopy
 from typing import Tuple
 
-import matplotlib.pyplot as plt
-import matplotlib
 import numpy as np
 from numpy import ndarray
-
-from typing import Callable
-from typing import Dict
-from operation import Operation
 
 from neural_network import NeuralNetwork
 from optimizer import Optimizer
@@ -70,9 +64,9 @@ class Trainer(object):
 
             self.best_loss = 1e9
 
-        for e in range(epochs):
+        for epoch in range(epochs):
 
-            if (e+1) % eval_every == 0:
+            if (epoch+1) % eval_every == 0:
                 
                 # for early stopping
                 last_model = deepcopy(self.net)
@@ -88,22 +82,22 @@ class Trainer(object):
 
                 self.optim.step()
 
-            if (e+1) % eval_every == 0:
+            if (epoch+1) % eval_every == 0:
 
                 test_preds = self.net.forward(X_test)
                 loss = self.net.loss.forward(test_preds, y_test)
 
                 if loss < self.best_loss:
-                    print(f"Validation loss after {e+1} epochs is {loss:.3f}")
+                    print(f"Validation loss after {epoch+1} epochs is {loss:.3f}")
                     self.best_loss = loss
                 else:
-                    print(f"""Loss increased after epoch {e+1}, final loss was {self.best_loss:.3f}, using the model from epoch {e+1-eval_every}""")
+                    print(f"""Loss increased after epoch {epoch+1}, final loss was {self.best_loss:.3f}, using the model from epoch {epoch+1-eval_every}""")
                     self.net = last_model
                     # ensure self.optim is still updating self.net
                     setattr(self.optim, 'net', self.net)
                     break
-    # helper function
 
+# helper function
 def permute_data(X, y):
     perm = np.random.permutation(X.shape[0])
     return X[perm], y[perm]

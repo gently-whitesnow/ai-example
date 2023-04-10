@@ -1,15 +1,12 @@
-import matplotlib.pyplot as plt
-import matplotlib
-import numpy as np
-from numpy import ndarray
-# %matplotlib inline
+from typing import List
 
-from typing import Callable, List
-from typing import Dict
-from operation import Operation
-from asserts import assert_same_shape
-from loss import Loss
+from numpy import ndarray
+
 from layer import Layer
+from loss import Loss
+
+
+# %matplotlib inline
 
 class NeuralNetwork(object):
     '''
@@ -39,6 +36,9 @@ class NeuralNetwork(object):
 
         return x_out
 
+    # Метод возвращает None,
+    # так как он просто обновляет градиенты параметров в каждом слое,
+    # которые хранятся в объектах Layer, и не возвращает никакого значения.
     def backward(self, loss_grad: ndarray) -> None:
         '''
         Passes data backward through a series of layers.
@@ -66,7 +66,8 @@ class NeuralNetwork(object):
         self.backward(self.loss.backward())
 
         return loss
-    
+
+    # Можно ли назвать все это генераторами для параметров и их градиентов?
     def params(self):
         '''
         Gets the parameters for the network.

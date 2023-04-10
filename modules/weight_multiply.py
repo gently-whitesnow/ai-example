@@ -1,11 +1,6 @@
-import matplotlib.pyplot as plt
-import matplotlib
 import numpy as np
 from numpy import ndarray
-# %matplotlib inline
 
-from typing import Callable
-from typing import Dict
 from param_operation import ParamOperation
 
 class WeightMultiply(ParamOperation):

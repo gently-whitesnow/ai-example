@@ -1,11 +1,7 @@
-import matplotlib.pyplot as plt
-import matplotlib
-import numpy as np
 from numpy import ndarray
-from typing import Callable
-from typing import Dict
-from operation import Operation
+
 from asserts import assert_same_shape
+
 
 class Loss(object):
     '''
