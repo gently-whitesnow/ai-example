@@ -10,52 +10,29 @@ from optimizer import Optimizer
 
 class Trainer(object):
     '''
-    Trains a neural network
+    Just a list of layers that runs forwards and backwards
     '''
     def __init__(self,
                  net: NeuralNetwork,
                  optim: Optimizer) -> None:
-        '''
-        Requires a neural network and an optimizer in order for training to occur. 
-        Assign the neural network as an instance variable to the optimizer.
-        '''
         self.net = net
         self.optim = optim
         self.best_loss = 1e9
         setattr(self.optim, 'net', self.net)
-        
-    def generate_batches(self,
-                         X: ndarray,
-                         y: ndarray,
-                         size: int = 32) -> Tuple[ndarray]:
-        '''
-        Generates batches for training 
-        '''
-        assert X.shape[0] == y.shape[0], \
-        '''
-        features and target must have the same number of rows, instead
-        features has {0} and target has {1}
-        '''.format(X.shape[0], y.shape[0])
 
-        N = X.shape[0]
-
-        for ii in range(0, N, size):
-            X_batch, y_batch = X[ii:ii+size], y[ii:ii+size]
-
-            yield X_batch, y_batch
-
-            
     def fit(self, X_train: ndarray, y_train: ndarray,
             X_test: ndarray, y_test: ndarray,
             epochs: int=100,
             eval_every: int=10,
             batch_size: int=32,
             seed: int = 1,
-            restart: bool = True)-> None:
-        '''
-        Fits the neural network on the training data for a certain number of epochs.
-        Every "eval_every" epochs, it evaluated the neural network on the testing data.
-        '''
+            single_output: bool = False,
+            restart: bool = True,
+            early_stopping: bool = True,
+            conv_testing: bool = False)-> None:
+
+        setattr(self.optim, 'max_epochs', epochs)
+        self.optim._setup_decay()
 
         np.random.seed(seed)
         if restart:
@@ -64,11 +41,10 @@ class Trainer(object):
 
             self.best_loss = 1e9
 
-        for epoch in range(epochs):
+        for e in range(epochs):
 
-            if (epoch+1) % eval_every == 0:
-                
-                # for early stopping
+            if (e+1) % eval_every == 0:
+
                 last_model = deepcopy(self.net)
 
             X_train, y_train = permute_data(X_train, y_train)
@@ -82,20 +58,61 @@ class Trainer(object):
 
                 self.optim.step()
 
-            if (epoch+1) % eval_every == 0:
+                if conv_testing:
+                    if ii % 10 == 0:
+                        test_preds = self.net.forward(X_batch, inference=True)
+                        batch_loss = self.net.loss.forward(test_preds, y_batch)
+                        print("batch",
+                              ii,
+                              "loss",
+                              batch_loss)
 
-                test_preds = self.net.forward(X_test)
+                    if ii % 100 == 0 and ii > 0:
+                        print("Validation accuracy after", ii, "batches is",
+                        f'''{np.equal(np.argmax(self.net.forward(X_test, inference=True), axis=1),
+                        np.argmax(y_test, axis=1)).sum() * 100.0 / X_test.shape[0]:.2f}%''')
+
+            if (e+1) % eval_every == 0:
+
+                test_preds = self.net.forward(X_test, inference=True)
                 loss = self.net.loss.forward(test_preds, y_test)
 
-                if loss < self.best_loss:
-                    print(f"Validation loss after {epoch+1} epochs is {loss:.3f}")
-                    self.best_loss = loss
+                if early_stopping:
+                    if loss < self.best_loss:
+                        print(f"Validation loss after {e+1} epochs is {loss:.3f}")
+                        self.best_loss = loss
+                    else:
+                        print()
+                        print(f"Loss increased after epoch {e+1}, final loss was {self.best_loss:.3f},",
+                              f"\nusing the model from epoch {e+1-eval_every}")
+                        self.net = last_model
+                        # ensure self.optim is still updating self.net
+                        setattr(self.optim, 'net', self.net)
+                        break
                 else:
-                    print(f"""Loss increased after epoch {epoch+1}, final loss was {self.best_loss:.3f}, using the model from epoch {epoch+1-eval_every}""")
-                    self.net = last_model
-                    # ensure self.optim is still updating self.net
-                    setattr(self.optim, 'net', self.net)
-                    break
+                    print(f"Validation loss after {e+1} epochs is {loss:.3f}")
+
+            if self.optim.final_lr:
+                self.optim._decay_lr()
+
+
+    def generate_batches(self,
+                         X: ndarray,
+                         y: ndarray,
+                         size: int = 32) -> Tuple[ndarray]:
+
+        assert X.shape[0] == y.shape[0], \
+        '''
+        features and target must have the same number of rows, instead
+        features has {0} and target has {1}
+        '''.format(X.shape[0], y.shape[0])
+
+        N = X.shape[0]
+
+        for ii in range(0, N, size):
+            X_batch, y_batch = X[ii:ii+size], y[ii:ii+size]
+
+            yield X_batch, y_batch
 
 # helper function
 def permute_data(X, y):

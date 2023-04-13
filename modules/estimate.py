@@ -25,3 +25,6 @@ def eval_regression_model(model: NeuralNetwork,
     print("Mean absolute error: {:.2f}".format(mae(preds, y_test)))
     print()
     print("Root mean squared error {:.2f}".format(rmse(preds, y_test)))
+
+def calc_accuracy_model(model, test_set, y_test):
+    return print(f'''The model validation accuracy is: {np.equal(np.argmax(model.forward(test_set, inference=True), axis=1), y_test).sum() * 100.0 / test_set.shape[0]:.2f}%''')

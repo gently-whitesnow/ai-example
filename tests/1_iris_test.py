@@ -1,10 +1,13 @@
+import sys
+sys.path.insert(0, '/Users/gently/Projects/ai-example/modules')
+
 from modules.dense import Dense
 from modules.linear import Linear
 from modules.mean_squared_error import MeanSquaredError
 from modules.estimate import eval_regression_model
 from modules.neural_network import NeuralNetwork
 from modules.optimizer import SGD
-from modules.datasets import get_iris_data
+from datasets.datasets import get_iris_data
 from modules.sigmoid import Sigmoid
 from modules.trainer import Trainer
 
